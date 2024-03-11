@@ -1,11 +1,9 @@
 package com.ducktappedapps.grpclogger.data
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.ducktappedapps.grpclogger.data.CallState
-import com.ducktappedapps.grpclogger.data.Log
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,6 +21,13 @@ interface LogsDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM Log WHERE  callId IS :callId ORDER BY timestamp ASC")
-    fun observeLogsForCallId(callId: String): Flow<List<Log>>
+    fun observeLogsForCallIdAscending(callId: String): Flow<List<Log>>
 
+
+    @Query("SELECT * FROM Log WHERE  callId IS :callId ORDER BY timestamp DESC")
+    fun observeLogsForCallIdDescending(callId: String): Flow<List<Log>>
+
+
+    @Query("SELECT * FROM Log WHERE state IS :state ORDER BY timestamp DESC")
+    fun getPagedAllRequests(state: CallState = CallState.REQUEST): PagingSource<Int,Log>
 }

@@ -1,5 +1,6 @@
 package com.ducktappedapps.grpclogger.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -36,6 +38,8 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.MoveDown
+import androidx.compose.material.icons.filled.MoveUp
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
@@ -62,6 +66,8 @@ internal fun DetailScreen(
     onClickBack: () -> Unit,
     logs: List<Log>,
     shareText: (log: List<Log>) -> Unit,
+    isSortingAscending: Boolean,
+    flipSorting: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier
@@ -84,6 +90,13 @@ internal fun DetailScreen(
                             modifier = Modifier,
                             imageVector = Icons.Default.Share,
                             contentDescription = Icons.Default.Star.name
+                        )
+                    }
+                    IconButton(onClick = flipSorting) {
+                        Icon(
+                            modifier = Modifier,
+                            imageVector = if (isSortingAscending) Icons.Default.MoveUp else Icons.Default.MoveDown,
+                            contentDescription = if (isSortingAscending) Icons.Default.MoveUp.name else Icons.Default.MoveDown.name
                         )
                     }
                 }
@@ -132,10 +145,10 @@ private fun CollapsableLog(
     modifier: Modifier,
     log: Log,
     shareText: (log: List<Log>) -> Unit,
-    isLastItem  : Boolean,
+    isLastItem: Boolean,
 ) {
     var isCollapsed by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
 
     Row(
@@ -214,43 +227,36 @@ private fun CollapsableLog(
 }
 
 @Composable
-@Preview(showSystemUi = true, showBackground = true, device = Devices.PIXEL_7)
+@Preview(
+    showSystemUi = false, showBackground = true, device = Devices.PIXEL_7,
+    uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
+)
 private fun PreviewDetailedScreen() {
+    var isSortingAscending by remember {
+        mutableStateOf(false)
+    }
     GrpcLoggerTheme {
         DetailScreen(
             modifier = Modifier.fillMaxSize(),
             onClickBack = { },
             logs = listOf(
+                CallState.REQUEST,
+                CallState.HEADERS,
+                CallState.RESPONSE,
+                CallState.RESPONSE,
+                CallState.RESPONSE,
+                CallState.CLOSE
+            ).mapIndexed { index, callType ->
                 Log(
-                    uid = 21,
                     timestamp = System.currentTimeMillis(),
-                    data = "jlfkds",
-                    callId = "324",
-                    callState = CallState.REQUEST
-                ),
-                Log(
-                    uid = 21,
-                    timestamp = System.currentTimeMillis(),
-                    data = "jlfkds",
-                    callId = "324",
-                    callState = CallState.HEADERS
-                ),
-                Log(
-                    uid = 21,
-                    timestamp = System.currentTimeMillis(),
-                    data = "jlfkds",
-                    callId = "324",
-                    callState = CallState.RESPONSE
-                ),
-                Log(
-                    uid = 21,
-                    timestamp = System.currentTimeMillis(),
-                    data = "jlfkds",
-                    callId = "324",
-                    callState = CallState.CLOSE
+                    data = "djsflk$index",
+                    callId = "342",
+                    callState = callType
                 )
-            ),
+            },
             shareText = {},
+            flipSorting = { isSortingAscending = !isSortingAscending },
+            isSortingAscending = isSortingAscending
         )
     }
 }

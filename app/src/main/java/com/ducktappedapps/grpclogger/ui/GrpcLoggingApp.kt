@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.ducktappedapps.grpclogger.shareText
 
 
@@ -21,7 +22,7 @@ internal fun GrpcLoggingApp(viewModel: GrpcLoggingViewModel) {
             context.shareText(it)
         }
 
-        val logs = viewModel.logs.collectAsState().value
+        val logs = viewModel.logs.collectAsLazyPagingItems()
         val detailedLogs = viewModel.detailedLogs.collectAsState().value
 
         if (detailedLogs.isEmpty()) {
@@ -37,6 +38,8 @@ internal fun GrpcLoggingApp(viewModel: GrpcLoggingViewModel) {
                 onClickBack = { viewModel.showDetailedLogsFor("") },
                 logs = detailedLogs,
                 shareText = { logsToShare -> viewModel.shareText(logsToShare) },
+                flipSorting = viewModel::flipSorting,
+                isSortingAscending = viewModel.logSortedByAscendingOrder.collectAsState().value,
             )
         }
     }
