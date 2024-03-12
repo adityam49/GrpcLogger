@@ -6,41 +6,53 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.ducktappedapps.grpclogger.shareText
 
 
 @Composable
-internal fun GrpcLoggingApp(viewModel: GrpcLoggingViewModel) {
+internal fun GrpcLoggingApp(
+    viewModel: GrpcLoggingViewModel,
+    showToast : (String) -> Unit,
+    shareText :(String) -> Unit,
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.surface
     ) {
-        val context = LocalContext.current
         viewModel.sharingTextFlow.CollectAsEffect {
-            context.shareText(it)
+            shareText(it)
         }
-
-        val logs = viewModel.logs.collectAsLazyPagingItems()
-        val detailedLogs = viewModel.detailedLogs.collectAsState().value
-
-        if (detailedLogs.isEmpty()) {
-            AllLogsScreen(
-                modifier = Modifier.fillMaxSize(),
-                allLogs = logs,
-                clearLogs = viewModel::clearLogs,
-                showDetailedLogs = viewModel::showDetailedLogsFor,
-            )
-        } else {
-            DetailScreen(
-                modifier = Modifier.fillMaxSize(),
-                onClickBack = { viewModel.showDetailedLogsFor("") },
-                logs = detailedLogs,
-                shareText = { logsToShare -> viewModel.shareText(logsToShare) },
-                flipSorting = viewModel::flipSorting,
-                isSortingAscending = viewModel.logSortedByAscendingOrder.collectAsState().value,
-            )
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = "All") {
+            composable("All") {
+                val logs = viewModel.logs.collectAsLazyPagingItems()
+                AllLogsScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    allLogs = logs,
+                    clearLogs = viewModel::clearLogs,
+                    showDetailedLogs = {
+                        viewModel.showDetailedLogsFor(it)
+                        navController.navigate("Detailed")
+                    },
+                    goBack = { navController.navigateUp() }
+                )
+            }
+            composable("Detailed") {
+                val detailedLogs = viewModel.detailedLogs.collectAsLazyPagingItems()
+                DetailScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    logs = detailedLogs,
+                    shareText = { logsToShare -> viewModel.shareText(logsToShare) },
+                    flipSorting = viewModel::flipSorting,
+                    isSortingAscending = viewModel.logSortedByAscendingOrder.collectAsState().value,
+                    goBack = { navController.navigateUp() },
+                    showToast = showToast
+                )
+            }
         }
     }
 }

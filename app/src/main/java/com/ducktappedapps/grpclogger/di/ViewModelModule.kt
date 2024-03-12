@@ -4,6 +4,7 @@ package com.ducktappedapps.grpclogger.di
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.ducktappedapps.grpclogger.ui.GrpcLoggingViewModel
+import com.ducktappedapps.grpclogger.ui.GrpcLoggingViewModelImpl
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module
@@ -37,7 +38,7 @@ abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(GrpcLoggingViewModel::class)
-    internal abstract fun logsViewModel(viewModel: GrpcLoggingViewModel): ViewModel
+    @ViewModelKey(GrpcLoggingViewModelImpl::class)
+    internal abstract fun logsViewModel(viewModel: GrpcLoggingViewModelImpl): ViewModel
 
 }

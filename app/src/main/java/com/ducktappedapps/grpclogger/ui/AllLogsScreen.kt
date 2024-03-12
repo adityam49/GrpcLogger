@@ -1,6 +1,7 @@
 package com.ducktappedapps.grpclogger.ui
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,11 @@ internal fun AllLogsScreen(
     clearLogs: () -> Unit,
     showDetailedLogs: (String) -> Unit,
     allLogs: LazyPagingItems<Log>,
+    goBack : () -> Unit,
 ) {
+    BackHandler {
+        goBack()
+    }
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -63,7 +68,6 @@ internal fun AllLogsScreen(
             modifier = Modifier
                 .padding(paddingValues),
         ) {
-
             items(allLogs.itemCount) { index ->
                 allLogs[index]?.let { log ->
                     Log(
@@ -76,9 +80,6 @@ internal fun AllLogsScreen(
                     )
                 }
             }
-//            allLogs.insertSeparators { _: Log?, log2: Log? ->
-//                log2 != null
-//            }
 //            items(allLogs) { index, item ->
 //                Log(
 //                    modifier = Modifier
@@ -166,7 +167,8 @@ private fun Test() {
                         }.toList()
                     )
                 )
-            }.collectAsLazyPagingItems()
+            }.collectAsLazyPagingItems(),
+            goBack = {}
         )
     }
 }

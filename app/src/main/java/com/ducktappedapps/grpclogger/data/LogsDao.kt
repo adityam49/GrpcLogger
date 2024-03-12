@@ -21,11 +21,11 @@ interface LogsDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM Log WHERE  callId IS :callId ORDER BY timestamp ASC")
-    fun observeLogsForCallIdAscending(callId: String): Flow<List<Log>>
+     fun observeLogsForCallIdAscending(callId: String): PagingSource<Int,Log>
 
 
     @Query("SELECT * FROM Log WHERE  callId IS :callId ORDER BY timestamp DESC")
-    fun observeLogsForCallIdDescending(callId: String): Flow<List<Log>>
+     fun observeLogsForCallIdDescending(callId: String): PagingSource<Int,Log>
 
 
     @Query("SELECT * FROM Log WHERE state IS :state ORDER BY timestamp DESC")

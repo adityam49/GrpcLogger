@@ -73,18 +73,20 @@ dependencies {
     debugImplementation(libs.bundles.compose.debug)
 
     implementation(libs.bundles.paging)
+
+    implementation(libs.navigation)
 }
 
 
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components.findByName("release"))
-            groupId = "org.ducktappedapps"
-            artifactId = "grpclogger"
-            version = "1.0"
-
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                from(components.findByName("debug"))
+                groupId = "com.github.adityam49"
+                artifactId = "grpcLogger"
+                version = "0.1"
+            }
         }
     }
 }

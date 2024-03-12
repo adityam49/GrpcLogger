@@ -24,6 +24,8 @@ val Colors.requestBlue: Color
 val Colors.responseGreen: Color
     get() = Color(0xffA6D9B6)
 
+val Colors.ActionButtonBackground :Color
+    get() = Color.White
 @Composable
 internal fun GrpcLoggerTheme(
     content: @Composable () -> Unit

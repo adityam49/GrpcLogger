@@ -118,7 +118,7 @@ class LogManagerImpl @Inject constructor(
             PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         val builder = NotificationCompat.Builder(context, "grpc_logs_channel")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.grpc_logger_24dp)
             .setContentTitle("Grpc Logs")
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
