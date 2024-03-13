@@ -7,7 +7,12 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
 
 interface LocalDataStore {
     fun logsEnabled(): Flow<Boolean>
@@ -23,8 +28,16 @@ class LocalDataStoreImpl(private val context: Context) : LocalDataStore {
         return context
             .dataStore
             .data
-            .map { preferences -> preferences[LOGGING_ENABLED] ?: false }
+            .transformLatest { preferences ->
+                val currentValue = preferences[LOGGING_ENABLED]
+                if (currentValue == null) {
+                    toggleLogging()
+                } else {
+                    emit(currentValue)
+                }
+            }
     }
+
     override suspend fun toggleLogging() {
         context.dataStore.edit {
             val isLoggingEnabled = it[LOGGING_ENABLED] ?: false

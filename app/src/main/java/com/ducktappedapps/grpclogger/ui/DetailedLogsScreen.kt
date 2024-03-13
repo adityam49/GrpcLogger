@@ -172,20 +172,50 @@ internal fun DetailScreen(
                     .padding(vertical = 16.dp),
                 verticalArrangement = Arrangement.Top,
             ) {
+                stickyHeader {
+                    Row(
+                        modifier = Modifier.padding(
+                            horizontal = 16.dp,
+                            vertical = 16.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .size(32.dp),
+                            shape = CircleShape,
+                            color = CallState.RESPONSE.toColor(),
+                        ) {
+                            Icon(
+                                tint = MaterialTheme.colors.onSecondary,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .size(24.dp),
+                                imageVector = Icons.Default.ArrowDownward,
+                                contentDescription = Icons.Default.ArrowDownward.name
+                            )
+                        }
+
+                        TickerText(
+                            text = "${logs.itemCount} Response",
+                            style = MaterialTheme.typography.body1,
+                            fontColor = MaterialTheme.colors.onSurface
+                        )
+                    }
+                }
                 items(logs.itemCount) { index ->
                     logs[index]?.let { log ->
                         LogItem(
                             modifier = Modifier.animateItemPlacement(),
                             log = log,
-                            shareText = shareText,
-                            isLastItem = index == logs.itemCount - 1,
-                            viewLogInDetail = {
-                                logOpenedInDetails = log
-                                coroutineScope.launch {
-                                    modalSheetState.show()
-                                }
+                            isLastItem = index == logs.itemCount - 1
+                        ) {
+                            logOpenedInDetails = log
+                            coroutineScope.launch {
+                                modalSheetState.show()
                             }
-                        )
+                        }
                     }
                 }
 
@@ -270,7 +300,6 @@ private fun LogBlock(
 private fun LogItem(
     modifier: Modifier,
     log: Log,
-    shareText: (log: List<Log>) -> Unit,
     isLastItem: Boolean,
     viewLogInDetail: () -> Unit
 ) {

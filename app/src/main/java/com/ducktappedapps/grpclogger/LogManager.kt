@@ -19,6 +19,7 @@ import com.ducktappedapps.grpclogger.data.LogsDao
 import com.ducktappedapps.grpclogger.ui.GrpcLoggerActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,11 +48,16 @@ class LogManagerImpl @Inject constructor(
 
     private val logsEnabled = localDataStore
         .logsEnabled()
-        .stateIn(coroutineScope, SharingStarted.Lazily, false)
+        .onEach {
+            android.util.Log.d(TAG, "logsEnabled flow : $it")
+        }
+        .stateIn(coroutineScope, SharingStarted.Eagerly, false)
 
 
     override fun logGrpcRequest(data: String, callId: String) {
-        if (logsEnabled.value)
+        android.util.Log.d(TAG, "logGrpcRequest: $data,$callId -> ${logsEnabled.value}")
+        if (logsEnabled.value){
+            android.util.Log.d(TAG, "logGrpcRequest: logging")
             coroutineScope.launch {
                 val log = Log(
                     timestamp = System.currentTimeMillis(),
@@ -62,10 +68,13 @@ class LogManagerImpl @Inject constructor(
                 dao.insertAll(log)
                 showNotification(log.data)
             }
+        }
     }
 
     override fun logGrpcHeaders(data: String, callId: String) {
-        if (logsEnabled.value)
+        android.util.Log.d(TAG, "logGrpcHeaders: $data,$callId -> ${logsEnabled.value}")
+        if (logsEnabled.value){
+            android.util.Log.d(TAG, "logGrpcHeaders: logging")
             coroutineScope.launch {
                 val log = Log(
                     timestamp = System.currentTimeMillis(),
@@ -76,11 +85,13 @@ class LogManagerImpl @Inject constructor(
                 dao.insertAll(log)
                 showNotification(log.data)
             }
+        }
     }
 
     override fun logGrpcResponse(data: String, callId: String) {
-        if (logsEnabled.value)
-
+        android.util.Log.d(TAG, "logGrpcResponse: $data,$callId -> ${logsEnabled.value}")
+        if (logsEnabled.value){
+            android.util.Log.d(TAG, "logGrpcResponse: logging")
             coroutineScope.launch {
                 val log = Log(
                     timestamp = System.currentTimeMillis(),
@@ -91,10 +102,13 @@ class LogManagerImpl @Inject constructor(
                 dao.insertAll(log)
                 showNotification(log.data)
             }
+        }
     }
 
     override fun logGrpcClose(data: String, callId: String) {
-        if (logsEnabled.value)
+        android.util.Log.d(TAG, "logGrpcClose: ${data},$callId -> ${logsEnabled.value}")
+        if (logsEnabled.value){
+            android.util.Log.d(TAG, "logGrpcClose: logging")
             coroutineScope.launch {
                 val log = Log(
                     timestamp = System.currentTimeMillis(),
@@ -105,6 +119,7 @@ class LogManagerImpl @Inject constructor(
                 dao.insertAll(log)
                 showNotification(log.data)
             }
+        }
     }
 
     private fun createNotificationChannel() {
@@ -147,5 +162,9 @@ class LogManagerImpl @Inject constructor(
                 notify(3248423, builder.build())
             }
         }
+    }
+
+    companion object{
+        const val TAG = "LogManager"
     }
 }

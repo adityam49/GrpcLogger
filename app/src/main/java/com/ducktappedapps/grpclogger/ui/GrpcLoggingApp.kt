@@ -38,7 +38,9 @@ internal fun GrpcLoggingApp(
                         viewModel.showDetailedLogsFor(it)
                         navController.navigate("Detailed")
                     },
-                    goBack = { navController.navigateUp() }
+                    goBack = { navController.navigateUp() },
+                    logsEnabled = viewModel.loggingEnabled.collectAsState().value,
+                    toggleLogging = viewModel::toggleLogging
                 )
             }
             composable("Detailed") {
