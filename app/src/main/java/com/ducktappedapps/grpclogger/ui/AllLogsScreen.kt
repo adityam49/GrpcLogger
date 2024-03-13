@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -42,7 +43,7 @@ internal fun AllLogsScreen(
     clearLogs: () -> Unit,
     showDetailedLogs: (String) -> Unit,
     allLogs: LazyPagingItems<Log>,
-    goBack : () -> Unit,
+    goBack: () -> Unit,
 ) {
     BackHandler {
         goBack()
@@ -72,27 +73,17 @@ internal fun AllLogsScreen(
                 allLogs[index]?.let { log ->
                     Log(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
                             .clickable {
                                 showDetailedLogs(log.callId)
                             },
                         log = log
                     )
+                    if (allLogs.itemCount - 1 != index) {
+                        Divider()
+                    }
                 }
             }
-//            items(allLogs) { index, item ->
-//                Log(
-//                    modifier = Modifier
-//                        .padding(horizontal = 16.dp)
-//                        .clickable {
-//                            showDetailedLogs(item.callId)
-//                        }, log = item
-//                )
-//                if (index != allLogs.lastIndex) {
-//                    Divider(color = MaterialTheme.colors.onSurface, thickness = 1.dp)
-//                }
-//            }
-
         }
     }
 }
@@ -107,12 +98,8 @@ private fun Log(
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            text = log.getFormattedDateTimestamp(),
-            style = MaterialTheme.typography.caption
+        TimeTag(
+            timeTag = log.getFormattedDateTimestamp(),
         )
 
         Text(
@@ -145,30 +132,17 @@ internal fun <T> Flow<T>.CollectAsEffect(
 )
 @Composable
 private fun Test() {
+    val viewModel = FakeGrpcLoggingViewModel()
+    val logs = viewModel.logs.collectAsLazyPagingItems()
     GrpcLoggerTheme {
         AllLogsScreen(
             modifier = Modifier.fillMaxSize(),
-            clearLogs = { },
-            showDetailedLogs = { },
-            allLogs = flow {
-                emit(
-                    PagingData.from(
-                        buildList {
-                            repeat(20) { index ->
-                                add(
-                                    Log(
-                                        timestamp = System.currentTimeMillis(),
-                                        callId = "callId$index",
-                                        data = "kljfds",
-                                        callState = CallState.REQUEST,
-                                    )
-                                )
-                            }
-                        }.toList()
-                    )
-                )
-            }.collectAsLazyPagingItems(),
-            goBack = {}
+            allLogs = logs,
+            clearLogs = viewModel::clearLogs,
+            showDetailedLogs = {
+                viewModel.showDetailedLogsFor(it)
+            },
+            goBack = { }
         )
     }
 }

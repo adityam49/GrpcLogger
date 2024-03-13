@@ -26,6 +26,10 @@ val Colors.responseGreen: Color
 
 val Colors.ActionButtonBackground :Color
     get() = Color.White
+
+val Colors.TimeTagColor  :Color
+    get() = PastelYellow
+
 @Composable
 internal fun GrpcLoggerTheme(
     content: @Composable () -> Unit

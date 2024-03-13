@@ -124,25 +124,31 @@ internal class GrpcLoggingViewModelImpl @Inject constructor(
 }
 
 class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
     override val logs: MutableStateFlow<PagingData<Log>> = MutableStateFlow(PagingData.empty())
     override val detailedLogs: MutableStateFlow<PagingData<Log>> =
         MutableStateFlow(PagingData.empty())
     override val logSortedByAscendingOrder: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val sharingTextFlow: MutableSharedFlow<String> = MutableSharedFlow()
 
+
     init {
-        logs.value = PagingData.from(buildList {
-            PagingData.from(
-                buildList { repeat(50) { add(CallState.REQUEST) } }
-                    .mapIndexed { index, callType ->
-                        Log(
-                            timestamp = System.currentTimeMillis(),
-                            data = longResponse,
-                            callId = "342",
-                            callState = callType
-                        )
-                    })
-        })
+        coroutineScope.launch {
+            logs.emit(
+                PagingData.from(
+                    buildList { repeat(50) { add(CallState.REQUEST) } }
+                        .mapIndexed { index, callType ->
+                            Log(
+                                timestamp = System.currentTimeMillis(),
+                                data = longResponse,
+                                callId = "342",
+                                callState = callType,
+                                uid = index,
+                            )
+                        })
+            )
+        }
+
 
     }
 
@@ -152,7 +158,7 @@ class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
 
     override fun showDetailedLogsFor(callId: String) {
         detailedLogs.value = PagingData.from(buildList {
-            PagingData.from(listOf(
+            listOf(
                 CallState.REQUEST,
                 CallState.HEADERS,
                 CallState.RESPONSE,
@@ -160,13 +166,16 @@ class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
                 CallState.RESPONSE,
                 CallState.CLOSE
             ).mapIndexed { index, callType ->
-                Log(
-                    timestamp = System.currentTimeMillis(),
-                    data = longResponse,
-                    callId = "342",
-                    callState = callType
+                add(
+                    Log(
+                        timestamp = System.currentTimeMillis(),
+                        data = longResponse,
+                        callId = callId,
+                        callState = callType,
+                        uid = index
+                    )
                 )
-            })
+            }
         })
     }
 
@@ -178,7 +187,8 @@ class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
 
     }
 
-    val longResponse = """{
+    companion object {
+        const val longResponse = """{
   "orderId": "FD123456789",
   "partnerId": "PRT12345",
   "partnerName": "Gourmet Meals on Wheels",
@@ -288,5 +298,7 @@ class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
   ]
 }
 """
+
+    }
 
 }
