@@ -2,7 +2,16 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="PreviewDetailedScreen - Detailed screen">
+        <State />
+      </entry>
+      <entry key="PreviewModalBottomSheet - BottomSheetTest">
+        <State />
+      </entry>
       <entry key="app">
+        <State />
+      </entry>
+      <entry key="noopgrpclogger">
         <State />
       </entry>
     </value>

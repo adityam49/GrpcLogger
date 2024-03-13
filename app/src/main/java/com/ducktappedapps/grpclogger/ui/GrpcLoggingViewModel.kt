@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ducktappedapps.grpclogger.data.CallState
+import com.ducktappedapps.grpclogger.data.LocalDataStore
 import com.ducktappedapps.grpclogger.data.Log
 import com.ducktappedapps.grpclogger.data.LogsDao
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,8 +18,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,41 +31,40 @@ internal interface GrpcLoggingViewModel {
     val detailedLogs: StateFlow<PagingData<Log>>
     val logSortedByAscendingOrder: StateFlow<Boolean>
     val sharingTextFlow: SharedFlow<String>
+    val loggingEnabled: StateFlow<Boolean>
 
     fun clearLogs()
     fun showDetailedLogsFor(callId: String)
     fun flipSorting()
     fun shareText(logs: List<Log>)
+    fun toggleLogging()
 }
 
 internal class GrpcLoggingViewModelImpl @Inject constructor(
     private val logsDao: LogsDao,
+    private val localDataStore: LocalDataStore,
     private val defaultDispatcher: CoroutineDispatcher,
 ) : GrpcLoggingViewModel, ViewModel() {
-    //    private val _logs: MutableStateFlow<PagingData<Log>> = MutableStateFlow(PagingData.empty())
     override val logs: MutableStateFlow<PagingData<Log>> = MutableStateFlow(PagingData.empty())
-//        get() = _logs
 
-    //    private val _detailedLogs: MutableStateFlow<PagingData<Log>> =
-//        MutableStateFlow(PagingData.empty())
     override val detailedLogs: MutableStateFlow<PagingData<Log>> =
         MutableStateFlow(PagingData.empty())
-//        get() = _detailedLogs
 
-    //    private val _sharingTextFlow: MutableSharedFlow<String> = MutableSharedFlow()
     override val sharingTextFlow: MutableSharedFlow<String> = MutableSharedFlow()
-//        get() = _sharingTextFlow
 
-    //    private val _logSortedByAscendingOrder: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val logSortedByAscendingOrder: MutableStateFlow<Boolean> =
-        MutableStateFlow<Boolean>(false)
-//        get() = _logSortedByAscendingOrder
+        MutableStateFlow(false)
+
+    override val loggingEnabled: StateFlow<Boolean> = localDataStore
+        .logsEnabled()
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
 
     init {
         viewModelScope.launch {
             Pager(
                 config = PagingConfig(
-                    pageSize = 20, // Define the number of items per page
+                    pageSize = 20,
                     enablePlaceholders = true,
                     maxSize = 100
                 ),
@@ -116,6 +119,12 @@ internal class GrpcLoggingViewModelImpl @Inject constructor(
         }
     }
 
+    override fun toggleLogging() {
+        viewModelScope.launch {
+            localDataStore.toggleLogging()
+        }
+    }
+
     override fun flipSorting() {
         viewModelScope.launch {
             logSortedByAscendingOrder.emit(!logSortedByAscendingOrder.value)
@@ -130,7 +139,7 @@ class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
         MutableStateFlow(PagingData.empty())
     override val logSortedByAscendingOrder: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val sharingTextFlow: MutableSharedFlow<String> = MutableSharedFlow()
-
+    override val loggingEnabled: StateFlow<Boolean> = MutableStateFlow(false)
 
     init {
         coroutineScope.launch {
@@ -154,6 +163,10 @@ class FakeGrpcLoggingViewModel() : GrpcLoggingViewModel {
 
     override fun clearLogs() {
         logs.value = PagingData.empty()
+    }
+
+    override fun toggleLogging() {
+
     }
 
     override fun showDetailedLogsFor(callId: String) {

@@ -13,10 +13,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ducktappedapps.grpclogger.data.CallState
+import com.ducktappedapps.grpclogger.data.LocalDataStore
 import com.ducktappedapps.grpclogger.data.Log
 import com.ducktappedapps.grpclogger.data.LogsDao
 import com.ducktappedapps.grpclogger.ui.GrpcLoggerActivity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,7 +31,7 @@ interface LogManager {
 
     fun logGrpcResponse(data: String, callId: String)
 
-    fun logGrpcClose(data :String, callId: String)
+    fun logGrpcClose(data: String, callId: String)
 
 }
 
@@ -36,61 +39,72 @@ class LogManagerImpl @Inject constructor(
     private val coroutineScope: CoroutineScope,
     private val dao: LogsDao,
     private val context: Context,
+    private val localDataStore: LocalDataStore,
 ) : LogManager {
     init {
         createNotificationChannel()
     }
 
+    private val logsEnabled = localDataStore
+        .logsEnabled()
+        .stateIn(coroutineScope, SharingStarted.Lazily, false)
+
+
     override fun logGrpcRequest(data: String, callId: String) {
-        coroutineScope.launch {
-            val log = Log(
-                timestamp = System.currentTimeMillis(),
-                data = data,
-                callState = CallState.REQUEST,
-                callId = callId
-            )
-            dao.insertAll(log)
-            showNotification(log.data)
-        }
+        if (logsEnabled.value)
+            coroutineScope.launch {
+                val log = Log(
+                    timestamp = System.currentTimeMillis(),
+                    data = data,
+                    callState = CallState.REQUEST,
+                    callId = callId
+                )
+                dao.insertAll(log)
+                showNotification(log.data)
+            }
     }
 
     override fun logGrpcHeaders(data: String, callId: String) {
-        coroutineScope.launch {
-            val log = Log(
-                timestamp = System.currentTimeMillis(),
-                data = data,
-                callState = CallState.HEADERS,
-                callId = callId
-            )
-            dao.insertAll(log)
-            showNotification(log.data)
-        }
+        if (logsEnabled.value)
+            coroutineScope.launch {
+                val log = Log(
+                    timestamp = System.currentTimeMillis(),
+                    data = data,
+                    callState = CallState.HEADERS,
+                    callId = callId
+                )
+                dao.insertAll(log)
+                showNotification(log.data)
+            }
     }
 
     override fun logGrpcResponse(data: String, callId: String) {
-        coroutineScope.launch {
-            val log = Log(
-                timestamp = System.currentTimeMillis(),
-                data = data,
-                callState = CallState.RESPONSE,
-                callId = callId
-            )
-            dao.insertAll(log)
-            showNotification(log.data)
-        }
+        if (logsEnabled.value)
+
+            coroutineScope.launch {
+                val log = Log(
+                    timestamp = System.currentTimeMillis(),
+                    data = data,
+                    callState = CallState.RESPONSE,
+                    callId = callId
+                )
+                dao.insertAll(log)
+                showNotification(log.data)
+            }
     }
 
-    override fun logGrpcClose(data: String,callId: String) {
-        coroutineScope.launch {
-            val log = Log(
-                timestamp = System.currentTimeMillis(),
-                data = data,
-                callState = CallState.CLOSE,
-                callId = callId
-            )
-            dao.insertAll(log)
-            showNotification(log.data)
-        }
+    override fun logGrpcClose(data: String, callId: String) {
+        if (logsEnabled.value)
+            coroutineScope.launch {
+                val log = Log(
+                    timestamp = System.currentTimeMillis(),
+                    data = data,
+                    callState = CallState.CLOSE,
+                    callId = callId
+                )
+                dao.insertAll(log)
+                showNotification(log.data)
+            }
     }
 
     private fun createNotificationChannel() {

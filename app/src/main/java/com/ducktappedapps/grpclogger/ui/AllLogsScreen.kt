@@ -9,11 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchColors
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -41,6 +45,8 @@ import kotlin.coroutines.EmptyCoroutineContext
 internal fun AllLogsScreen(
     modifier: Modifier,
     clearLogs: () -> Unit,
+    toggleLogging: () -> Unit,
+    logsEnabled: Boolean,
     showDetailedLogs: (String) -> Unit,
     allLogs: LazyPagingItems<Log>,
     goBack: () -> Unit,
@@ -55,6 +61,7 @@ internal fun AllLogsScreen(
                 backgroundColor = MaterialTheme.colors.surface,
                 title = { Text(text = "All Logs") },
                 actions = {
+                    Switch(checked = logsEnabled, onCheckedChange = { toggleLogging() })
                     IconButton(onClick = clearLogs) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -142,7 +149,9 @@ private fun Test() {
             showDetailedLogs = {
                 viewModel.showDetailedLogsFor(it)
             },
-            goBack = { }
+            goBack = { },
+            logsEnabled = true,
+            toggleLogging = {},
         )
     }
 }

@@ -1,5 +1,6 @@
 [versions]
 compile-sdk = "34"
+datastorePreferences = "1.0.0"
 min-sdk = "23"
 roomRuntime = "2.6.1"
 composeCompilerVersion = "1.5.3"
@@ -18,6 +19,7 @@ navigation = "2.7.7"
 
 
 [libraries]
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }

@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.ducktappedapps.grpclogger.GrpcLoggingInterceptor
 import com.ducktappedapps.grpclogger.LogManager
 import com.ducktappedapps.grpclogger.LogManagerImpl
+import com.ducktappedapps.grpclogger.data.LocalDataStore
+import com.ducktappedapps.grpclogger.data.LocalDataStoreImpl
 import com.ducktappedapps.grpclogger.data.LogsDao
 import com.ducktappedapps.grpclogger.data.LogsDb
 import dagger.Module
@@ -57,5 +59,11 @@ object GrpcLoggingModule {
     @Provides
     fun provideLoggingManager(logsManager: LogManagerImpl): LogManager {
         return logsManager
+    }
+
+    @Singleton
+    @Provides
+    fun LocalDataStore(context: Context) : LocalDataStore{
+        return LocalDataStoreImpl(context)
     }
 }
