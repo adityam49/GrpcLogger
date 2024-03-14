@@ -14,7 +14,6 @@ android {
     defaultConfig {
         minSdk = libs.versions.min.sdk.get().toIntOrNull()
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -84,10 +83,10 @@ dependencies {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("maven") {
+            create<MavenPublication>("logging") {
                 from(components.findByName("debug"))
                 groupId = "com.github.adityam49"
-                artifactId = "grpcLogger"
+                artifactId = "grpc-logger"
                 version = "0.1"
             }
         }

@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "GrpcLogger"
 include(":app")
- 
+include(":no-op-grpc-logging")

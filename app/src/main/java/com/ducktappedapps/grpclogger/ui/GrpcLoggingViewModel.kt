@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -58,9 +56,6 @@ internal class GrpcLoggingViewModelImpl @Inject constructor(
 
     override val loggingEnabled: StateFlow<Boolean> = localDataStore
         .logsEnabled()
-        .onEach {
-            android.util.Log.d("ViewModel", "logsEnabled $it")
-        }
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
 
@@ -125,7 +120,6 @@ internal class GrpcLoggingViewModelImpl @Inject constructor(
 
     override fun toggleLogging() {
         viewModelScope.launch {
-            android.util.Log.d("ViewModel", "toggleLogging")
             localDataStore.toggleLogging()
         }
     }

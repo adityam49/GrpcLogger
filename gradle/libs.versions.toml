@@ -58,7 +58,6 @@ room-paging = { group = "androidx.room", name = "room-paging", version.ref = "ro
 #navigation
 navigation = { group = "androidx.navigation",name = "navigation-compose",version.ref = "navigation"}
 
-
 [bundles]
 grpc = ["grpc-okhttp"]
 compose-debug = ["androidx-compose-ui-tooling-preview"]

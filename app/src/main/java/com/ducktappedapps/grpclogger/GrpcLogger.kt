@@ -1,6 +1,7 @@
-package com.ducktappedapps.grpclogger.di
+package com.ducktappedapps.grpclogger
 
 import android.content.Context
+import com.ducktappedapps.grpclogger.di.GrpcLoggerComponentHolder
 import io.grpc.ClientInterceptor
 
 class GrpcLogger(
