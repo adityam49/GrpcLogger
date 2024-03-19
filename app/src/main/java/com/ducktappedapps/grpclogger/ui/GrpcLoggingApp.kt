@@ -16,7 +16,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 @Composable
 internal fun GrpcLoggingApp(
     viewModel: GrpcLoggingViewModel,
-    showToast : (String) -> Unit,
     shareText :(String) -> Unit,
 ) {
     Surface(
@@ -52,7 +51,6 @@ internal fun GrpcLoggingApp(
                     flipSorting = viewModel::flipSorting,
                     isSortingAscending = viewModel.logSortedByAscendingOrder.collectAsState().value,
                     goBack = { navController.navigateUp() },
-                    showToast = showToast
                 )
             }
         }

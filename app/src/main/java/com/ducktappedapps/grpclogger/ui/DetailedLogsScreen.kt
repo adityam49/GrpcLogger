@@ -2,8 +2,8 @@ package com.ducktappedapps.grpclogger.ui
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -80,7 +80,6 @@ internal fun DetailScreen(
     isSortingAscending: Boolean,
     flipSorting: () -> Unit,
     goBack: () -> Unit,
-    showToast: (String) -> Unit,
 ) {
     var logOpenedInDetails by remember {
         mutableStateOf<Log?>(null)
@@ -95,7 +94,6 @@ internal fun DetailScreen(
         if (modalSheetState.isVisible) {
             coroutineScope.launch { modalSheetState.hide() }
         } else {
-            showToast("Going back from swipe back")
             goBack()
         }
     }
@@ -110,7 +108,7 @@ internal fun DetailScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(8.dp),
             ) {
                 logOpenedInDetails?.let {
                     LogBlock(
@@ -138,7 +136,6 @@ internal fun DetailScreen(
                     title = { Text(text = "Detailed Logs") },
                     navigationIcon = {
                         IconButton(onClick = {
-                            showToast("Going back from top back button")
                             goBack()
                         }) {
                             Icon(
@@ -238,40 +235,54 @@ private fun LogBlock(
     ) {
         stickyHeader {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Surface(
                     modifier = Modifier.padding(vertical = 16.dp),
-                    color = log.callState.toColor(),
+                    color = MaterialTheme.colors.surface,
+                    border = BorderStroke(width = 1.dp, color = log.callState.toColor()),
                     shape = RoundedCornerShape(16)
                 ) {
                     Text(
                         text = log.callState.name.camelCase(),
                         modifier = Modifier.padding(8.dp),
                         style = MaterialTheme.typography.h6,
-                        color = MaterialTheme.colors.onSecondary,
+                        color = log.callState.toColor(),
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
                 IconButton(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colors.ActionButtonBackground,
-                        shape = CircleShape
-                    ), onClick = { shareText(listOf(log)) }
+                    modifier = Modifier
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colors.ActionButtonBackground,
+                            shape = CircleShape
+                        ),
+                    onClick = { shareText(listOf(log)) }
                 ) {
-                    Icon(Icons.Default.Share, Icons.Default.Share.name, tint = Color.Black)
+                    Icon(
+                        Icons.Default.Share,
+                        Icons.Default.Share.name,
+                        tint = MaterialTheme.colors.ActionButtonBackground
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 IconButton(
                     modifier = Modifier
-                        .background(color = MaterialTheme.colors.error, shape = CircleShape),
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colors.error,
+                            shape = CircleShape
+                        ),
                     onClick = { closeDetailedLogs() },
                 ) {
                     Icon(
-                        tint = MaterialTheme.colors.onError,
+                        tint = MaterialTheme.colors.error,
                         imageVector = Icons.Default.Close,
                         contentDescription = Icons.Default.Close.name
                     )
@@ -279,17 +290,18 @@ private fun LogBlock(
             }
         }
         item {
-            SelectionContainer {
+            SelectionContainer(modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(
                     text = log.data,
                     style = MaterialTheme.typography.caption,
                     modifier = Modifier
+                        .padding(16.dp)
                         .border(
                             width = 1.dp,
                             color = log.callState.toColor(),
                             shape = RoundedCornerShape(4.dp)
                         )
-                        .padding(8.dp)
+                        .padding(16.dp)
                 )
             }
         }
@@ -385,7 +397,6 @@ private fun PreviewDetailedScreen() {
             flipSorting = viewModel::flipSorting,
             isSortingAscending = viewModel.logSortedByAscendingOrder.collectAsState().value,
             goBack = { },
-            showToast = {},
         )
     }
 }
